@@ -412,8 +412,8 @@ async function deployToken() {
             const freeMintSupply = 0n;
             const freeMintPerTx = 0n;
             const freeMintUserCap = 0n;
-            const factory = getContract(FACTORY_ADDR, FACTORY_ABI, provider, btcNetwork, opAddressObj);
-            const simulation = await (factory as any).deployToken(
+            const factory: any = getContract(FACTORY_ADDR, FACTORY_ABI, provider, btcNetwork, opAddressObj);
+            const simulation = await factory.deployToken(
                 maxSupply,
                 decimalsVal,
                 name,
