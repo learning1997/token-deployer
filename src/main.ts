@@ -412,8 +412,10 @@ async function deployToken() {
             const freeMintSupply = 0n;
             const freeMintPerTx = 0n;
             const freeMintUserCap = 0n;
-            const factory: any = getContract(FACTORY_ADDR, FACTORY_ABI, provider, btcNetwork, opAddressObj);
-            const simulation = await factory.deployToken(
+            const factory = getContract(FACTORY_ADDR, FACTORY_ABI, provider, btcNetwork, opAddressObj);
+            const deployFn = (factory as unknown as Record<string, (...args: any[]) => Promise<any>>)['deployToken'];
+            if (!deployFn) throw new Error('Factory method deployToken not found');
+            const simulation = await deployFn(
                 maxSupply,
                 decimalsVal,
                 name,
