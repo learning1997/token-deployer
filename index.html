@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OP-20 Token Deployer — Bitcoin L1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="./src/style.css">
+</head>
+
+<body class="js-loading">
+    <div id="js-ready-indicator" style="display:none;"></div>
+    <div class="wrap">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon">₿</div>
+                <div class="logo-text"><span>OP</span>-20 Deployer</div>
+            </div>
+            <div class="network-badge">
+                <div class="dot"></div>
+                Bitcoin L1 · OP_NET
+            </div>
+        </header>
+
+        <!-- Hero -->
+        <div class="hero">
+            <div class="hero-eyebrow">Bitcoin Smart Contracts</div>
+            <h1>Deploy your token<br>on <span class="accent">Bitcoin L1</span></h1>
+            <p>Create and deploy OP-20 tokens directly on Bitcoin Layer 1 using OP_NET smart contracts. Pure Bitcoin, no
+                bridges.</p>
+        </div>
+
+        <!-- Wallet -->
+        <div class="wallet-section">
+            <button class="btn-wallet" id="walletBtn">
+                <div class="left">
+                    <div class="wallet-icon">⬡</div>
+                    <span id="walletText">Connect OP_WALLET</span>
+                </div>
+                <div class="right-info">
+                    <span class="balance" id="walletBal"></span>
+                    <span class="addr" id="walletAddr"></span>
+                </div>
+            </button>
+        </div>
+
+        <!-- Card 1: Network Selection -->
+        <div class="card">
+            <div class="card-title">
+                <div class="card-title-num">1</div> Deployment Configuration
+            </div>
+            <div class="form-grid">
+                <div class="field">
+                    <label>Select Network <span class="req">*</span></label>
+                    <select id="networkSelect">
+                        <option value="testnet" selected>Opnet Testnet (tBTC)</option>
+                        <option value="regtest">Bitcoin Regtest (rBTC)</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Custom WASM (Optional)</label>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="wasmUpload" accept=".wasm" class="file-input">
+                        <div class="file-dummy">
+                            <span class="file-text">Click to upload .wasm</span>
+                        </div>
+                    </div>
+                    <span class="field-hint">Leave empty to use default MintableToken</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Token Info -->
+        <div class="card">
+            <div class="card-title">
+                <div class="card-title-num">2</div> Token Identity
+            </div>
+            <div class="form-grid three">
+                <div class="field">
+                    <label>Token Name <span class="req">*</span></label>
+                    <input type="text" id="tokenName" placeholder="e.g. Manha">
+                </div>
+                <div class="field">
+                    <label>Symbol <span class="req">*</span></label>
+                    <input type="text" id="tokenSymbol" placeholder="MNA" maxlength="8">
+                </div>
+                <div class="field">
+                    <label>Decimals</label>
+                    <select id="tokenDecimals">
+                        <option value="18" selected>18</option>
+                        <option value="8">8 (BTC-style)</option>
+                        <option value="6">6 (USDT-style)</option>
+                        <option value="0">0 (Whole)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Supply -->
+        <div class="card">
+            <div class="card-title">
+                <div class="card-title-num">3</div> Supply Configuration
+            </div>
+            <div class="form-grid">
+                <div class="field">
+                    <label>Total Supply <span class="req">*</span></label>
+                    <input type="number" id="totalSupply" placeholder="21000000" value="21000000" min="1">
+                    <span class="field-hint">Max token supply</span>
+                </div>
+                <div class="field">
+                    <label>Initial Mint</label>
+                    <input type="number" id="initialMint" placeholder="21000000" value="21000000" min="0">
+                    <span class="field-hint">Minted to deployer</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-label">Mintable</div>
+                        <div class="toggle-desc">Owner can mint additional tokens</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="mintable"><span
+                            class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-label">Burnable</div>
+                        <div class="toggle-desc">Token holders can burn tokens</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="burnable" checked><span
+                            class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                    <div class="toggle-info">
+                        <div class="toggle-label">Pausable</div>
+                        <div class="toggle-desc">Owner can pause all transfers</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="pausable"><span
+                            class="toggle-slider"></span></label>
+                </div>
+            </div>
+
+            <div class="gas-row">
+                <span>Estimated Gas</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="gas-val" id="gasEst">~0.00032 BTC</span>
+                    <span class="gas-badge">ESTIMATE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Token Preview -->
+        <div class="card" id="previewCard" style="border-color: rgba(247,147,26,0.15);">
+            <div class="card-title">
+                <div class="card-title-num">⬡</div> Preview
+            </div>
+            <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+                <div style="width:52px;height:52px;border-radius:50%;background:var(--orange);display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:16px;color:#000;flex-shrink:0;"
+                    id="previewIcon">?</div>
+                <div>
+                    <div style="font-family:var(--display);font-weight:700;font-size:18px;" id="previewName">Your Token
+                    </div>
+                    <div style="font-size:12px;color:var(--text-dim);margin-top:3px;" id="previewDetails">SYMBOL ·
+                        21,000,000 supply · 18 decimals</div>
+                    <div style="font-size:11px;color:var(--orange);margin-top:4px;">OP-20 · Bitcoin L1</div>
+                </div>
+            </div>
+
+            <!-- Cost Breakdown Section -->
+            <div class="cost-breakdown">
+                <div class="cost-header-row">
+                    <div class="cost-header">Estimated Cost</div>
+                    <div class="cost-live-badge">LIVE</div>
+                </div>
+
+                <div class="cost-row">
+                    <span class="cost-label">Network Fee</span>
+                    <span class="cost-value" id="costNetworkFee">~3,500 sats</span>
+                </div>
+
+                <div class="cost-row">
+                    <span class="cost-label">Platform Fee</span>
+                    <span class="cost-value" id="costPlatformFee">10,000 sats <span class="cost-btc">(0.0001
+                            BTC)</span></span>
+                </div>
+
+                <div class="cost-row sub">
+                    <span class="cost-label">Max Spend Limit</span>
+                    <span class="cost-value dimmed" id="costMaxLimit">100,000 sats</span>
+                </div>
+
+                <div class="cost-total">
+                    <span>Estimated Total</span>
+                    <span id="costTotal">~13,500 sats</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deploy button -->
+        <button class="btn-deploy" id="deployBtn">
+            <span class="spinner" id="spinner"></span>
+            <span class="btn-text" id="deployText">🚀 Deploy Token</span>
+        </button>
+
+        <!-- Status / Progress -->
+        <div class="deploy-steps" id="deploySteps">
+            <div class="step" id="step1">
+                <div class="step-dot" id="s1dot">1</div>
+                <div class="step-text">Compiling OP-20 contract...</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-dot" id="s2dot">2</div>
+                <div class="step-text">Signing with OP_WALLET...</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-dot" id="s3dot">3</div>
+                <div class="step-text">Broadcasting to Bitcoin L1...</div>
+            </div>
+            <div class="step" id="step4">
+                <div class="step-dot" id="s4dot">4</div>
+                <div class="step-text">Waiting for confirmation...</div>
+            </div>
+        </div>
+
+        <!-- Success box -->
+        <div class="status-box success" id="successBox">
+            <div class="status-header">
+                <div class="status-icon">✓</div>
+                Token Deployed Successfully
+            </div>
+            <div class="status-detail">Your OP-20 token has been deployed to Bitcoin L1.</div>
+
+            <div class="contract-label">Contract Address</div>
+            <div class="contract-addr">
+                <span id="contractAddrText">bc1p...x7f2</span>
+                <button class="copy-btn" onclick="copyAddr()">COPY</button>
+            </div>
+
+            <div class="contract-label" style="margin-top:12px;">Transaction Hash</div>
+            <div class="contract-addr">
+                <span id="txHashText">0x...</span>
+                <a id="opscanLink" href="#" target="_blank" class="opscan-btn">VIEW ON OPSCAN</a>
+            </div>
+        </div>
+
+        <!-- Error box -->
+        <div class="status-box error" id="errorBox">
+            <div class="status-header">
+                <div class="status-icon">✗</div>
+                Deployment Failed
+            </div>
+            <div class="status-detail" id="errorMsg">Error message here.</div>
+        </div>
+
+        <footer>
+            <div>Powered by <a href="https://opnet.org">OP_NET</a> · Bitcoin L1 Smart Contracts</div>
+        </footer>
+
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+</body>
+
+</html>
